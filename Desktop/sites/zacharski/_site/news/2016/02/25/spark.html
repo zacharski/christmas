@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width initial-scale=1">
+
+<meta property="og:title" content="Matrix Factorization">
+<title>Matrix Factorization</title>
+<meta property="og:description" content="Before I talk about how to make recommendations using matrix factorization, I need to review dot products.">
+<meta property="og:url" content="http://yulijia.net/freshman21/news/2016/02/25/spark.html">
+<meta property="og:site_name" content="Zacharski">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@yulijia">
+<meta name="twitter:creator" content="@yulijia">
+<meta name="twitter:title" content="Matrix Factorization">
+<meta name="twitter:description" content="Before I talk about how to make recommendations using matrix factorization, I need to review dot products.">
+<meta name="twitter:url" content="http://yulijia.net/freshman21/news/2016/02/25/spark.html">
+
+<meta name="keywords" content="Jekyll, theme, Freshman21">
+
+<link rel="icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/main.css">
+<link rel="canonical" href="http://yulijia.net/freshman21/news/2016/02/25/spark.html">
+<link rel="alternate" type="application/atom+xml" title="Zacharski" href="http://yulijia.net/freshman21/feed.xml" />
+
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+</head>
+
+
+
+
+<body>
+
+<div class="container">
+
+  <header class="site-header">
+
+  <div class="wrapper">
+
+    <h1 class="site-title"><a href="/">Zacharski</a></h1>
+    <h3 class="site-meta">Thoughts on Machine Learning</h3>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+      <div class="trigger">
+        
+        
+        <a class="page-link" href="/">Home</a>
+        
+        
+        
+        <a class="page-link" href="/about/">About</a>
+        
+        
+        
+        <a class="page-link" href="/archives/">Archives</a>
+        
+        
+        
+        <a class="page-link" href="/categories/">Categories</a>
+        
+        
+        
+        <a class="page-link" href="/tags/">Tags</a>
+        
+        
+        
+        <a class="page-link" href="/guestbook/">Guestbook</a>
+        
+        
+        
+        <a class="page-link" href="/feed.xml">Subscribe</a>
+        
+        
+        
+        
+        
+        
+        
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+  
+
+  <div class="page-content">
+    <div class="wrapper">
+      <div class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 itemprop="name" class="post-title">Matrix Factorization</h1>
+    <meta itemprop="keywords" content="Recommendation Engines,Dot Product,Matrix Factorization" />
+    <p class="post-meta">
+    Posted in
+    
+    <a href="/categories/#news">news</a>
+     
+    
+    and tagged
+    
+    <a href="/tags/#Recommendation Engines" title="Recommendation Engines">Recommendation Engines </a>, 
+    
+    <a href="/tags/#Dot Product" title="Dot Product">Dot Product </a>, 
+    
+    <a href="/tags/#Matrix Factorization" title="Matrix Factorization">Matrix Factorization </a>
+    
+    
+    <time itemprop="datePublished" datetime="2016-02-25">
+    on Feb 25, 2016
+    </time>
+    </p>
+  </header>
+
+  <article class="post-content" itemprop="articleBody">
+    <p>Before I talk about how to make recommendations using matrix factorization, I need to review dot products.</p>
+
+<p>A list of numbers, for example, Jake’s weights for the features: [-0.37,  2.38] is called a <strong>vector</strong>. A dot product is performed on two vectors of equal length and produces a single value. It is defined as follows:</p>
+
+<p>Let A and B be two vectors of equal length. Then</p>
+
+<div>$$ A \cdot  B = \sum_{i=1}^nA_iB_i=A_1B_1+A_2B_2+A_1B_1+...A_nB_n$$</div>
+
+<p>So above we determined Jake’s rating of Taylor Swift by getting the dot product of Jake, <em>J</em> and Taylor Swift, <em>S</em>:</p>
+
+<script type="math/tex; mode=display">J \cdot  S = -0.37 \times 0.79 +  2.38 \times 2.13 = 4.78</script>
+
+<p>And, since I am giving things fancy names in this section,  I am going to call the Table from users to weights of the different features, Matrix P and the table from artists to weight Matrix Q. Once we have P and Q it is easy to make predictions.</p>
+
+<h3 id="how-do-we-get-matrices-p-and-q">How do we get Matrices P and Q?</h3>
+
+<p>Well we guess.</p>
+
+<p>math stuff</p>
+<div>let $$r_{ij}$$ be the rating user *i* gave to item *j*. </div>
+
+<div>$$\hat{r}_{ij}=p_i^Tq_j=\sum_{k=1}^{k}p_{ik}q_{kj}$$</div>
+
+
+  </article>
+  <hr />
+</div>
+
+
+<section class="pager">
+  <ul>
+    
+    <li class="previous"><a href="/news/2016/02/22/code.html" title="Code">&larr; Older</a></li>
+    
+    
+    <li class="disabled"><a>Newer &rarr;</a>
+    
+  </ul>
+</section>
+
+<div id="disqus_thread"></div>
+
+<script type="text/javascript">
+
+  var disqus_developer = 1;
+
+var disqus_shortname ='freshman21';
+/* * * DON'T EDIT BELOW THIS LINE * * */
+(function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+    </div>
+  </div>
+  <section class="pager">
+  
+  
+</section>
+
+
+
+  
+
+  <footer class="site-footer">
+
+  <p>Copyright &copy; <a href="/">Zacharski</a></p>
+  <p>Powered by <a href="https://github.com/jekyll/jekyll">Jekyll</a> 
+  on 
+  
+  <a href="https://github.com/">Github</a>
+  
+  | Theme <a href="https://github.com/yulijia/freshman21/">Freshman21</a> Design by <a href="http://yulijia.net">Lijia Yu</a>  
+
+</footer>
+
+
+</div>
+
+</body>
+
+</html>
